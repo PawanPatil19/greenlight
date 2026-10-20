@@ -128,6 +128,17 @@ final class RulesTests: XCTestCase {
         XCTAssertEqual(Rules.staleness(since: now.addingTimeInterval(-20), now: now), "Updated just now")
         XCTAssertEqual(Rules.staleness(since: now.addingTimeInterval(-240), now: now), "Updated 4 min ago")
         XCTAssertEqual(Rules.refreshInterval(Samples.snapshot), 120)
+        XCTAssertEqual(Rules.shortAgo(since: now.addingTimeInterval(-30), now: now), "now")
+        XCTAssertEqual(Rules.shortAgo(since: now.addingTimeInterval(-150), now: now), "2m")
+        XCTAssertEqual(Rules.shortAgo(since: now.addingTimeInterval(-7200), now: now), "2h")
+    }
+
+    func testCountsAndTitleParts() {
+        XCTAssertEqual(Rules.counts(Samples.snapshot), "1 running · 1 done")
+        XCTAssertEqual(Rules.counts(.empty), "No sessions")
+        XCTAssertEqual(Rules.titleParts("greenlight · main").repo, "greenlight")
+        XCTAssertEqual(Rules.titleParts("greenlight · main").branch, "main")
+        XCTAssertNil(Rules.titleParts("scratch").branch)
     }
 }
 

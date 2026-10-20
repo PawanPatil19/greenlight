@@ -75,11 +75,30 @@ jobs:
       - uses: actions/checkout@v4
       - run: swift test --package-path ios/GreenlightKit
 
+  # Compiles the app and widget targets for the simulator, unsigned. Catches Swift
+  # errors in code that can't build on Linux. Runs only when ios/ changes.
+  ios-build:
+    needs: changes
+    if: needs.changes.outputs.ios == 'true'
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install xcodegen
+      - run: xcodegen
+      - run: |
+          xcodebuild build -project Greenlight.xcodeproj -scheme Greenlight \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO | tail -n 60
+          exit ${PIPESTATUS[0]}
+
   # Single check to require in branch protection. Passes when every job that
   # ran succeeded and the skipped ones were skipped on purpose.
   required:
     if: always()
-    needs: [changes, relay, plugin, ios]
+    needs: [changes, relay, plugin, ios, ios-build]
     runs-on: ubuntu-latest
     steps:
       - name: Check job results

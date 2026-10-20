@@ -21,6 +21,15 @@ ios/
 | Notification | Session title and the short question (never the command) | Allow / Deny; high risk gets Review / Deny |
 | App review screen | Full command, host, time left before the terminal takes over | Every option; approvals above low risk need Face ID or passcode |
 
+## Looks
+
+The widget follows the Home Screen style the user picks ([mockups](../docs/img/widget-mockup.png), source in [`docs/design/widget-mockup.html`](../docs/design/widget-mockup.html)):
+
+- **Light and dark** (full colour): the widget draws its own soft gradient background and uses colour for status: amber needs you, blue running, red failed, green done.
+- **Clear and tinted** (iOS 26 Liquid Glass, and tinted on iOS 18): the system draws the glass and recolours everything. The widget switches to a white palette and marks the count, the signal dot and the main button with `widgetAccentable()`, so status still reads through weight and opacity instead of colour.
+
+The palette lives in one place (`Palette` in `GreenlightWidgets/GreenlightWidgets.swift`), picked from `colorScheme` and `widgetRenderingMode`.
+
 ## Run it on your iPhone
 
 You need a Mac with Xcode 16+, an Apple ID, and the relay running on a computer your phone can reach (same Wi-Fi is fine).
@@ -60,7 +69,7 @@ iOS only allows plain `http` to local network addresses. To use the widget away 
 swift test --package-path ios/GreenlightKit   # what CI runs (Linux or macOS)
 ```
 
-The app and widget targets are not built in CI yet (they need a macOS runner and signing). Building them in Xcode is the check for now.
+CI also generates the Xcode project and builds the app and widget for the simulator on macOS, unsigned, whenever `ios/` changes.
 
 ## Known gaps
 

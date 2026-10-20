@@ -22,6 +22,7 @@ targets:
     type: application
     platform: iOS
     sources: [Greenlight, Shared]
+    scheme: {}
     dependencies:
       - package: GreenlightKit
       - target: GreenlightWidgets
