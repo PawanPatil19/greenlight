@@ -7,7 +7,7 @@
 3. **Commit with Conventional Commits.** `feat(relay): add /v1/ask endpoint`, `fix(plugin): fall back to terminal on timeout`. Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `ci`. Scopes: `relay`, `plugin`, `ios`, `docs`, `repo`.
 4. **Open a pull request early.** Use a draft PR while the work is in progress. Fill in the PR template.
 5. **CI must be green.** The `CI` workflow runs the checks for every part the PR touches.
-6. **Review.** At least one approval from a code owner before merging.
+6. **Review.** The code owner reviews every PR before merging. While this is a one-person repo, GitHub can't count an approval on your own PRs (PRs Claude opens are authored under your account), so review is required by habit, not by a setting. Raise the required approvals to 1 once a second person joins.
 7. **Squash and merge.** The PR title becomes the commit message on `main`, so it must follow Conventional Commits too. The branch is deleted after merge.
 
 `main` is always releasable. Nobody pushes to it directly.
@@ -16,8 +16,9 @@
 
 These are set once in GitHub (Settings → Rules → Rulesets, or Settings → Branches) for `main`:
 
-- Require a pull request before merging, with 1 approval and code owner review.
-- Require the `CI / required` status check to pass, and the branch to be up to date.
+- Require a pull request before merging (0 required approvals for now, see step 6 above).
+- Require the `required` status check (from the CI workflow) to pass, and the branch to be up to date.
+- Require conversation resolution before merging.
 - Require linear history.
 - Block force pushes and deletions.
 
