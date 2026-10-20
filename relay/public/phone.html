@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Greenlight phone simulator</title>
+    <style>
+      :root {
+        --bg: #e9ecef;
+        --phone: #0d0f12;
+        --screen: linear-gradient(160deg, #1b3a4b 0%, #2a2350 60%, #3b1f3a 100%);
+        --card: rgba(255, 255, 255, 0.92);
+        --text: #111;
+        --muted: #5f6670;
+        --line: rgba(0, 0, 0, 0.08);
+        --needs: #ff9f0a;
+        --failed: #ff453a;
+        --running: #0a84ff;
+        --done: #30d158;
+        --paused: #8e8e93;
+        --primary: #0a84ff;
+        --destructive: #ff453a;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #101214;
+          --card: rgba(28, 28, 30, 0.92);
+          --text: #f2f2f7;
+          --muted: #a1a1aa;
+          --line: rgba(255, 255, 255, 0.1);
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font:
+          15px/1.35 -apple-system,
+          BlinkMacSystemFont,
+          "SF Pro Text",
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        display: flex;
+        justify-content: center;
+        padding: 24px 16px;
+      }
+      .phone {
+        width: 390px;
+        max-width: 100%;
+        min-height: 780px;
+        background: var(--phone);
+        border-radius: 52px;
+        padding: 14px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      }
+      .screen {
+        background: var(--screen);
+        border-radius: 40px;
+        min-height: 752px;
+        padding: 56px 16px 24px;
+        position: relative;
+        overflow: hidden;
+      }
+      .island {
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 34px;
+        background: #000;
+        border-radius: 20px;
+      }
+      .label {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 12px;
+        text-align: center;
+        margin: 6px 0 18px;
+      }
+      .widget {
+        background: var(--card);
+        border-radius: 22px;
+        padding: 14px 14px 10px;
+        backdrop-filter: blur(20px);
+      }
+      .widget header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+      .headline {
+        font-weight: 700;
+        font-size: 17px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .stale {
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 20px minmax(0, 1fr);
+        gap: 8px;
+        padding: 8px 0;
+        border-top: 1px solid var(--line);
+      }
+      .icon {
+        font-size: 14px;
+        line-height: 20px;
+        text-align: center;
+      }
+      .title {
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .step {
+        color: var(--muted);
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      code.detail {
+        display: block;
+        margin: 6px 0;
+        padding: 6px 8px;
+        border-radius: 8px;
+        background: rgba(127, 127, 127, 0.14);
+        font:
+          12px/1.4 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          monospace;
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 4.2em;
+        overflow: hidden;
+      }
+      .buttons {
+        display: flex;
+        gap: 6px;
+        margin-top: 4px;
+      }
+      button {
+        font: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        border: 0;
+        border-radius: 999px;
+        padding: 6px 12px;
+        cursor: pointer;
+        background: rgba(127, 127, 127, 0.2);
+        color: var(--text);
+      }
+      button.primary {
+        background: var(--primary);
+        color: #fff;
+      }
+      button.destructive {
+        background: rgba(255, 69, 58, 0.15);
+        color: var(--destructive);
+      }
+      button:disabled {
+        opacity: 0.5;
+      }
+      .risk {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 6px;
+        margin-left: 4px;
+        vertical-align: 1px;
+      }
+      .risk.high {
+        background: rgba(255, 69, 58, 0.15);
+        color: var(--destructive);
+      }
+      .risk.medium {
+        background: rgba(255, 159, 10, 0.18);
+        color: #b26a00;
+      }
+      .risk.low {
+        background: rgba(48, 209, 88, 0.18);
+        color: #1d7a36;
+      }
+      .empty {
+        color: var(--muted);
+        padding: 10px 0 6px;
+        border-top: 1px solid var(--line);
+      }
+      .more {
+        color: var(--muted);
+        font-size: 12px;
+        padding-top: 6px;
+        border-top: 1px solid var(--line);
+      }
+      .small-row {
+        display: flex;
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .small {
+        flex: 1;
+        aspect-ratio: 1;
+        background: var(--card);
+        border-radius: 22px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .big-number {
+        font-size: 44px;
+        font-weight: 700;
+        line-height: 1;
+      }
+      .pause {
+        width: 100%;
+        padding: 12px;
+        font-size: 15px;
+      }
+      .pause.on {
+        background: var(--needs);
+        color: #000;
+      }
+      details {
+        margin-top: 16px;
+        background: var(--card);
+        border-radius: 18px;
+        padding: 10px 14px;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .audit {
+        font-size: 12px;
+        color: var(--muted);
+        padding: 6px 0;
+        border-top: 1px solid var(--line);
+      }
+      .sheet {
+        position: absolute;
+        inset: auto 0 0 0;
+        background: var(--card);
+        border-radius: 24px 24px 40px 40px;
+        padding: 20px 18px 28px;
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+        transform: translateY(110%);
+        transition: transform 0.25s ease;
+      }
+      .sheet.open {
+        transform: translateY(0);
+      }
+      .sheet code.detail {
+        max-height: 14em;
+        overflow: auto;
+      }
+      .setup {
+        background: var(--card);
+        border-radius: 18px;
+        padding: 16px;
+      }
+      .setup input {
+        width: 100%;
+        font: inherit;
+        padding: 8px;
+        margin: 8px 0;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+      }
+      .toast {
+        position: absolute;
+        left: 16px;
+        right: 16px;
+        top: 56px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 10px 14px;
+        border-radius: 14px;
+        font-size: 13px;
+        opacity: 0;
+        transition: opacity 0.2s;
+        pointer-events: none;
+      }
+      .toast.show {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="phone">
+      <div class="screen" id="screen">
+        <div class="island"></div>
+        <div class="toast" id="toast"></div>
+        <div id="app"></div>
+        <div class="sheet" id="sheet"></div>
+      </div>
+    </div>
+
+    <script>
+      // A stand-in for the iPhone widget, using the same API and rules as the real one.
+      const ICONS = { needs_you: "🟠", failed: "⛔", running: "🔵", paused: "⏸", done: "✅" };
+      const WORDS = {
+        needs_you: "Needs you",
+        failed: "Failed",
+        running: "Running",
+        paused: "Paused",
+        done: "Done",
+      };
+      const DEVICE = "Phone simulator";
+
+      const hashToken = new URLSearchParams(location.hash.slice(1)).get("token");
+      if (hashToken) {
+        try {
+          localStorage.setItem("greenlight-token", hashToken);
+        } catch {}
+        history.replaceState(null, "", location.pathname);
+      }
+      let token = hashToken || safeGet("greenlight-token") || "";
+      let snapshot = null;
+      let audit = [];
+      let lastUpdate = 0;
+      let busy = new Set();
+
+      function safeGet(k) {
+        try {
+          return localStorage.getItem(k);
+        } catch {
+          return null;
+        }
+      }
+
+      const $ = (id) => document.getElementById(id);
+      const esc = (s) =>
+        String(s ?? "").replace(
+          /[&<>"']/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
+        );
+
+      async function api(method, path, body) {
+        const res = await fetch(path, {
+          method,
+          headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+          body: body === undefined ? undefined : JSON.stringify(body),
+        });
+        if (res.status === 401) {
+          token = "";
+          render();
+          throw new Error("unauthorized");
+        }
+        const json = await res.json().catch(() => ({}));
+        return { status: res.status, body: json };
+      }
+
+      function toast(text) {
+        const t = $("toast");
+        t.textContent = text;
+        t.classList.add("show");
+        clearTimeout(toast.timer);
+        toast.timer = setTimeout(() => t.classList.remove("show"), 2200);
+      }
+
+      function ago(ms) {
+        const s = Math.max(0, Math.round(ms / 1000));
+        if (s < 5) return "just now";
+        if (s < 60) return `${s} s ago`;
+        return `${Math.round(s / 60)} min ago`;
+      }
+
+      // Widget rules: low and medium risk answer in one tap (the real widget requires the
+      // phone to be unlocked for medium); high risk needs the full review screen + Face ID.
+      function askButtons(ask) {
+        if (ask.risk === "high") {
+          return `<div class="buttons"><button class="primary" data-review="${ask.id}">Review</button></div>`;
+        }
+        return `<div class="buttons">${ask.options
+          .filter((o) => o.id !== "terminal")
+          .map(
+            (o) =>
+              `<button class="${o.style || ""}" data-ask="${ask.id}" data-option="${esc(o.id)}" ${busy.has(ask.id) ? "disabled" : ""}>${esc(o.label)}</button>`,
+          )
+          .join("")}</div>`;
+      }
+
+      function row(s, { full }) {
+        const ask = s.ask;
+        const line = ask
+          ? ask.question
+          : s.state === "done" && s.summary
+            ? s.summary
+            : s.step || WORDS[s.state];
+        return `<div class="row">
+          <div class="icon" title="${WORDS[s.state]}">${ICONS[s.state]}</div>
+          <div>
+            <div class="title">${esc(s.title)}${ask ? `<span class="risk ${ask.risk}">${ask.risk}</span>` : ""}</div>
+            <div class="step"><span class="sr">${WORDS[s.state]} · </span>${esc(line)}</div>
+            ${ask ? `<code class="detail">${esc(ask.detail)}</code>${askButtons(ask)}` : ""}
+            ${full && s.host ? `<div class="step">${esc(s.host)}</div>` : ""}
+          </div>
+        </div>`;
+      }
+
+      function render() {
+        const app = $("app");
+        if (!token) {
+          app.innerHTML = `<div class="setup">
+            <div class="headline">Pair with your relay</div>
+            <p class="step">Paste the token the relay printed, or open the simulator link it printed.</p>
+            <input id="token" placeholder="token" autocomplete="off" />
+            <button class="primary" id="save">Pair</button></div>`;
+          $("save").onclick = () => {
+            token = $("token").value.trim();
+            try {
+              localStorage.setItem("greenlight-token", token);
+            } catch {}
+            connect();
+          };
+          return;
+        }
+        if (!snapshot) {
+          app.innerHTML = `<div class="label">Connecting…</div>`;
+          return;
+        }
+        const { sessions, needsYou, paused } = snapshot;
+        const headline = needsYou
+          ? `🟠 ${needsYou} need${needsYou === 1 ? "s" : ""} you`
+          : paused
+            ? "⏸ All paused"
+            : sessions.some((s) => s.state === "running")
+              ? "🟢 All running"
+              : sessions.length
+                ? "🟢 Nothing needs you"
+                : "No sessions";
+        const shown = sessions.slice(0, 3);
+        const open = { sessions: $("sessions-box")?.open, audit: $("audit-box")?.open };
+        const running = sessions.filter((s) => s.state === "running").length;
+
+        app.innerHTML = `
+          <div class="label">Home Screen · medium widget</div>
+          <div class="widget">
+            <header><div class="headline">${headline}</div><div class="stale" id="stale"></div></header>
+            ${shown.length ? shown.map((s) => row(s, { full: false })).join("") : `<div class="empty">Start Claude Code with the plugin to see sessions here.</div>`}
+            ${sessions.length > 3 ? `<div class="more">+${sessions.length - 3} more</div>` : ""}
+          </div>
+          <div class="small-row">
+            <div class="small">
+              <div class="step">Need you</div>
+              <div class="big-number" style="color:${needsYou ? "var(--needs)" : "var(--done)"}">${needsYou}</div>
+              <div class="step">${running} running</div>
+            </div>
+            <div class="small">
+              <div class="step">Kill switch</div>
+              <button class="pause ${paused ? "on" : ""}" id="pause">${paused ? "Resume all" : "Pause all"}</button>
+              <div class="step">${paused ? "Tools are blocked" : "Sessions can run"}</div>
+            </div>
+          </div>
+          <details id="sessions-box" ${open.sessions ? "open" : ""}>
+            <summary>App · all sessions (${sessions.length})</summary>
+            ${sessions.map((s) => row(s, { full: true })).join("") || `<div class="empty">Nothing yet.</div>`}
+          </details>
+          <details id="audit-box" ${open.audit ? "open" : ""}>
+            <summary>App · audit log</summary>
+            ${audit.map((e) => `<div class="audit"><b>${esc(e.outcome)}</b> · ${esc(e.sessionTitle)} · ${esc(e.question)}${e.detail ? ` <code>${esc(e.detail.slice(0, 80))}</code>` : ""}<br>${new Date(e.at).toLocaleTimeString()}${e.by ? ` · ${esc(e.by)}` : ""}</div>`).join("") || `<div class="audit">No decisions yet.</div>`}
+          </details>`;
+        tick();
+      }
+
+      function tick() {
+        const el = $("stale");
+        if (el && lastUpdate) el.textContent = `Updated ${ago(Date.now() - lastUpdate)}`;
+      }
+      setInterval(tick, 1000);
+
+      async function answer(askId, option) {
+        busy.add(askId);
+        render();
+        try {
+          const { status, body } = await api("POST", `/v1/asks/${askId}/answer`, {
+            option,
+            device: DEVICE,
+          });
+          const label = body.options?.find((o) => o.id === option)?.label ?? option;
+          if (status === 200) toast(`${label} → sent. Claude Code continues.`);
+          else if (status === 410)
+            toast("Too late: this question was already answered in the terminal or timed out.");
+          else if (status === 409) toast("Already answered differently.");
+          else toast(`Could not answer (${status}).`);
+        } catch (e) {
+          toast("Relay unreachable. Nothing was approved.");
+        } finally {
+          busy.delete(askId);
+          closeSheet();
+          refreshAudit();
+        }
+      }
+
+      function openReview(askId) {
+        const session = snapshot.sessions.find((s) => s.ask?.id === askId);
+        if (!session) return;
+        const ask = session.ask;
+        const sheet = $("sheet");
+        sheet.innerHTML = `
+          <div class="headline">${esc(ask.question)} <span class="risk ${ask.risk}">${ask.risk}</span></div>
+          <div class="step">${esc(session.title)}${session.host ? " · " + esc(session.host) : ""}</div>
+          <code class="detail">${esc(ask.detail)}</code>
+          <p class="step">High-risk actions open the app and need Face ID on the real phone.</p>
+          <div class="buttons">${ask.options
+            .map(
+              (o) =>
+                `<button class="${o.style || ""}" data-ask="${ask.id}" data-option="${esc(o.id)}" data-confirm="1">${esc(o.label)}</button>`,
+            )
+            .join("")}<button data-close="1">Cancel</button></div>`;
+        sheet.classList.add("open");
+      }
+      function closeSheet() {
+        $("sheet").classList.remove("open");
+      }
+
+      document.addEventListener("click", async (e) => {
+        const b = e.target.closest("button");
+        if (!b) return;
+        if (b.dataset.review) return openReview(b.dataset.review);
+        if (b.dataset.close) return closeSheet();
+        if (b.dataset.ask) {
+          if (
+            b.dataset.confirm &&
+            b.dataset.option === "allow" &&
+            !confirm("Face ID (simulated): approve this high-risk action?")
+          )
+            return;
+          return answer(b.dataset.ask, b.dataset.option);
+        }
+        if (b.id === "pause") {
+          const { body } = await api("PUT", "/v1/control", { paused: !snapshot.paused });
+          toast(body.paused ? "Paused. Every session's next tool call is blocked." : "Resumed.");
+          refreshAudit();
+        }
+      });
+
+      async function refreshAudit() {
+        try {
+          audit = (await api("GET", "/v1/audit?limit=20")).body.entries ?? [];
+          render();
+        } catch {}
+      }
+
+      function apply(next) {
+        const before = snapshot?.needsYou ?? 0;
+        snapshot = next;
+        lastUpdate = Date.now();
+        if (next.needsYou > before) toast("🔔 A session needs you");
+        // Close the review sheet if its question was answered elsewhere.
+        const sheetAsk = $("sheet").querySelector("[data-ask]")?.dataset.ask;
+        if (sheetAsk && !next.sessions.some((s) => s.ask?.id === sheetAsk)) closeSheet();
+        render();
+      }
+
+      // Live updates over server-sent events, read with fetch so the token goes in a header.
+      async function connect() {
+        render();
+        while (token) {
+          try {
+            const res = await fetch("/v1/stream", {
+              headers: { authorization: `Bearer ${token}` },
+            });
+            if (res.status === 401) {
+              token = "";
+              render();
+              return;
+            }
+            refreshAudit();
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            let buf = "";
+            for (;;) {
+              const { value, done } = await reader.read();
+              if (done) break;
+              buf += decoder.decode(value, { stream: true });
+              let i;
+              while ((i = buf.indexOf("\n\n")) >= 0) {
+                const chunk = buf.slice(0, i);
+                buf = buf.slice(i + 2);
+                const data = chunk
+                  .split("\n")
+                  .filter((l) => l.startsWith("data: "))
+                  .map((l) => l.slice(6))
+                  .join("\n");
+                if (data) apply(JSON.parse(data));
+              }
+            }
+          } catch {}
+          await new Promise((r) => setTimeout(r, 2000));
+        }
+      }
+      connect();
+    </script>
+  </body>
+</html>

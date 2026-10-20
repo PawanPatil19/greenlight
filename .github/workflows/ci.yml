@@ -29,6 +29,7 @@ jobs:
           filters: |
             relay:
               - 'relay/**'
+              - 'plugin/**'
               - 'docs/protocol.md'
               - '.github/workflows/ci.yml'
             plugin:
