@@ -1,0 +1,9 @@
+{
+  "name": "greenlight",
+  "version": "0.1.0",
+  "description": "Report Claude Code session status to the Greenlight relay so you can follow and approve sessions from your iPhone.",
+  "author": {
+    "name": "PawanPatil19"
+  },
+  "license": "UNLICENSED"
+}

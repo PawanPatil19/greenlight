@@ -1,0 +1,22 @@
+name: Feature
+description: Something new to build
+labels: [enhancement]
+body:
+  - type: dropdown
+    id: part
+    attributes:
+      label: Part
+      options: [relay, plugin, ios, docs]
+      multiple: true
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What should it do, and why?
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: How do we know it's done?
