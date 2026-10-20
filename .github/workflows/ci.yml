@@ -22,7 +22,7 @@ jobs:
       plugin: ${{ steps.filter.outputs.plugin }}
       ios: ${{ steps.filter.outputs.ios }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -46,7 +46,7 @@ jobs:
       run:
         working-directory: relay
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -60,7 +60,7 @@ jobs:
     if: needs.changes.outputs.plugin == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: plugin/scripts/validate.sh
 
   ios:
@@ -72,7 +72,7 @@ jobs:
     # and are built on a Mac (see ios/README.md).
     container: swift:6.0
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: swift test --package-path ios/GreenlightKit
 
   # Compiles the app and widget targets for the simulator, unsigned. Catches Swift
@@ -85,7 +85,7 @@ jobs:
       run:
         working-directory: ios
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: brew install xcodegen
       - run: xcodegen
       - run: |
