@@ -46,6 +46,32 @@ public enum Rules {
         return "Updated \(seconds / 3600) h ago"
     }
 
+    /// Compact age for list rows: "now", "2m", "1h", "3d".
+    public static func shortAgo(since: Date, now: Date = Date()) -> String {
+        let seconds = max(0, Int(now.timeIntervalSince(since)))
+        if seconds < 60 { return "now" }
+        if seconds < 3600 { return "\(seconds / 60)m" }
+        if seconds < 86400 { return "\(seconds / 3600)h" }
+        return "\(seconds / 86400)d"
+    }
+
+    /// "2 running · 1 failed · 1 done", skipping states with no sessions.
+    public static func counts(_ snapshot: Snapshot, excludingNeedsYou: Bool = true) -> String {
+        let order: [SessionState] = [.needsYou, .running, .paused, .failed, .done]
+        let parts = order.compactMap { state -> String? in
+            if excludingNeedsYou && state == .needsYou { return nil }
+            let n = snapshot.sessions.filter { $0.state == state }.count
+            return n == 0 ? nil : "\(n) \(state.word.lowercased())"
+        }
+        return parts.isEmpty ? "No sessions" : parts.joined(separator: " · ")
+    }
+
+    /// Splits "repo · branch" for two-weight titles.
+    public static func titleParts(_ title: String) -> (repo: String, branch: String?) {
+        guard let range = title.range(of: " · ") else { return (title, nil) }
+        return (String(title[..<range.lowerBound]), String(title[range.upperBound...]))
+    }
+
     /// How soon the widget should ask iOS for a fresh timeline. Pushes refresh it sooner.
     public static func refreshInterval(_ snapshot: Snapshot) -> TimeInterval {
         if snapshot.needsYou > 0 { return 2 * 60 }

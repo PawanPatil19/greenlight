@@ -11,9 +11,11 @@ See which session needs you, and give it the green light with one tap.
 ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
 ![Status: early prototype](https://img.shields.io/badge/status-early%20prototype-orange)
 
-<img src="docs/img/widget-mockup.png" width="820" alt="Mockup of the Greenlight widgets: a medium widget asking to run npm test with Run and Deny, a large widget sending a git push to review in the app, small count widgets, and the Lock Screen with a notification">
+<img src="docs/img/widget-mockup.png" width="900" alt="Greenlight widgets in four Home Screen looks: light, dark, clear glass and tinted glass. Each shows a medium widget with one session asking to run npm test with Run and Deny buttons, two small widgets (1 needs you, All clear) and a medium widget listing running sessions">
 
-<sub>Mockup drawn from the widget's SwiftUI code with sample data.</sub>
+<img src="docs/img/widget-large-lock.png" width="900" alt="The large widget in light, dark and clear glass, sending a high-risk git push to review in the app, and the Lock Screen with a needs-you gauge, a summary widget and a notification with Allow and Deny">
+
+<sub>Mockups drawn from the widget's SwiftUI code with sample data. Clear and tinted are the iOS 26 Liquid Glass Home Screen looks.</sub>
 
 </div>
 
