@@ -67,11 +67,13 @@ jobs:
     needs: changes
     if: needs.changes.outputs.ios == 'true'
     runs-on: ubuntu-latest
+    # GreenlightKit (models, relay client, widget rules) is Foundation-only, so it
+    # builds and tests on Linux. The app and widget targets need Xcode and signing
+    # and are built on a Mac (see ios/README.md).
+    container: swift:6.0
     steps:
       - uses: actions/checkout@v4
-      # Placeholder until the Xcode project exists. Then switch runs-on to
-      # macos-15 and run xcodebuild test.
-      - run: echo "No Xcode project yet; nothing to build."
+      - run: swift test --package-path ios/GreenlightKit
 
   # Single check to require in branch protection. Passes when every job that
   # ran succeeded and the skipped ones were skipped on purpose.

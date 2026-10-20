@@ -59,7 +59,8 @@ export function askAlertPayload(ask: Ask, sessionTitle: string): Record<string, 
     aps: {
       alert: { title: sessionTitle, body: ask.question },
       sound: "default",
-      category: "GREENLIGHT_ASK",
+      // High-risk asks get a category without an Allow action: they must be reviewed in the app.
+      category: ask.risk === "high" ? "GREENLIGHT_ASK_HIGH" : "GREENLIGHT_ASK",
       "thread-id": ask.sessionId,
       "interruption-level": "time-sensitive",
       "content-available": 1,

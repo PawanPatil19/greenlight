@@ -37,6 +37,12 @@ test("the alert payload never carries the command", () => {
   const payload = askAlertPayload(ask, "greenlight · main");
   assert.doesNotMatch(JSON.stringify(payload), /rm -rf/);
   assert.equal(payload.askId, ask.id);
+  assert.equal((payload.aps as { category: string }).category, "GREENLIGHT_ASK_HIGH");
+  const medium = store.openAsk(parseAsk(askBody("s2", { risk: "medium" })));
+  assert.equal(
+    (askAlertPayload(medium, "x").aps as { category: string }).category,
+    "GREENLIGHT_ASK",
+  );
   store.shutdown();
 });
 

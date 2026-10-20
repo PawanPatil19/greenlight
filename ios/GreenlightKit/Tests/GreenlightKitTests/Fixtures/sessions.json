@@ -1,0 +1,56 @@
+{
+  "sessions": [
+    {
+      "id": "fx",
+      "agent": "claude-code",
+      "title": "greenlight · main",
+      "state": "needs_you",
+      "startedAt": "2026-10-20T04:04:15.762Z",
+      "updatedAt": "2026-10-20T04:04:15.772Z",
+      "host": "macbook",
+      "step": "Run a shell command?",
+      "ask": {
+        "sessionId": "fx",
+        "question": "Run a shell command?",
+        "detail": "git push origin main",
+        "options": [
+          {
+            "id": "allow",
+            "label": "Run",
+            "style": "primary"
+          },
+          {
+            "id": "deny",
+            "label": "Deny",
+            "style": "destructive"
+          },
+          {
+            "id": "terminal",
+            "label": "Terminal",
+            "style": "neutral"
+          }
+        ],
+        "risk": "high",
+        "timeoutSec": 300,
+        "id": "7c1a7b2d-d751-4b2f-a4cf-818caeecf7e4",
+        "status": "pending",
+        "createdAt": "2026-10-20T04:04:15.772Z",
+        "expiresAt": "2026-10-20T04:09:15.772Z"
+      }
+    },
+    {
+      "id": "sim-42cd399b",
+      "agent": "claude-code",
+      "title": "greenlight · claude/project-thread-xdcfs6",
+      "state": "done",
+      "startedAt": "2026-10-20T03:58:05.992Z",
+      "updatedAt": "2026-10-20T03:58:13.898Z",
+      "host": "vm",
+      "step": "Done",
+      "summary": "Fixed the flaky login test and pushed the branch."
+    }
+  ],
+  "needsYou": 1,
+  "paused": false,
+  "serverTime": "2026-10-20T04:04:15.782Z"
+}

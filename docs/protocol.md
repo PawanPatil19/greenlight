@@ -91,7 +91,7 @@ Errors are `{ "error": "code", "message": "…" }`.
 
 Sent only when the relay has APNs credentials (`APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_KEY_PATH`, `APNS_TOPIC`).
 
-- **New ask** (`alert`, category `GREENLIGHT_ASK`): title is the session title, body is the `question`. Custom keys: `askId`, `sessionId`, `risk`. Also `content-available` so the app refreshes its widget.
+- **New ask** (`alert`, category `GREENLIGHT_ASK`, or `GREENLIGHT_ASK_HIGH` for high risk, which has no Allow action): title is the session title, body is the `question`. Custom keys: `askId`, `sessionId`, `risk`. Also `content-available` so the app refreshes its widget.
 - **Anything else changed** (`background`, throttled to one per 20 s): `{ "aps": { "content-available": 1 }, "kind": "refresh" }`.
 
 Payloads never carry `detail`, commands, file contents or secrets. The app fetches details from the relay.
